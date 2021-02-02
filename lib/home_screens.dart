@@ -11,20 +11,24 @@ class HomeScreens extends StatefulWidget {
 
 class _HomeScreensState extends State<HomeScreens> {
   final _textField = TextEditingController();
-  List<String> todos = [
-    'Test Todo 1',
-    'Test Todo 2',
-    'Test Todo 3',
-    'Test Todo 4',
-    'Test Todo 5'
-  ];
-  void _addtodo() {
+
+
+  //for server request get.....
+
+  Future<void> _addtodo() async {
     if (_textField.text.length <= 0) {
       return;
     }
-    setState(() {
-      todos.insert(0, _textField.text);
+
+    final collucrion = FirebaseFirestore.instance.collection('todo');
+    await collucrion.add({
+      "title": _textField.text,
+    
     });
+
+
+
+
 
     _textField.text = '';
     Navigator.of(context).pop();
@@ -47,11 +51,12 @@ class _HomeScreensState extends State<HomeScreens> {
           }
           return ListView(
             children: snapshot.data.docs
-            .map((todoData) =>SingleTodo(
-              todo: todoData.data()['title'],) ,).toList
-               (),
-
-            
+                .map(
+                  (todoData) => SingleTodo(
+                    todo: todoData.data()['title'],
+                  ),
+                )
+                .toList(),
           );
         },
       ),
