@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crud/single_todo.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreens extends StatefulWidget {
@@ -11,6 +12,7 @@ class HomeScreens extends StatefulWidget {
 
 class _HomeScreensState extends State<HomeScreens> {
   final _textField = TextEditingController();
+  final _textUpdate = TextEditingController();
 
   //for server request get.....
 
@@ -32,13 +34,64 @@ class _HomeScreensState extends State<HomeScreens> {
 
   //for delete
 
-  Future<void> dellateTodo(String id)async {
+  Future<void> dellateTodo(String id) async {
     try {
       final collucrion = FirebaseFirestore.instance.collection('todo').doc(id);
       await collucrion.delete();
     } catch (e) {
       print(e);
     }
+  }
+
+//for updateing
+  Future<void> _updatetodo(String id) {
+    String updateText =  _textUpdate.text;
+    try {
+      DocumentReference documentReference =
+          FirebaseFirestore.instance.collection('todo').doc(id);
+      FirebaseFirestore.instance.runTransaction((transition) async {
+        
+            await transition.get(documentReference);
+        transition.update(documentReference, {
+          'title': updateText,
+        });
+      });
+      Navigator.of(context).pop();
+      _textUpdate.text = '';
+    } catch (e) {}
+  }
+
+  Future<void> editbutton(String id) async {
+    final collucrion = FirebaseFirestore.instance.collection('todo').doc(id);
+    await collucrion.get().then((value) {
+      _textUpdate.text = (value.data()['title']);
+    });
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Update Todo"),
+            content: TextField(
+              controller: _textUpdate,
+              decoration: InputDecoration(hintText: "Update Todo"),
+            ),
+            actions: [
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cencel'),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  //for data update
+                  _updatetodo(id);
+                },
+                child: Text('Update'),
+              )
+            ],
+          );
+        });
   }
 
   @override
@@ -62,7 +115,8 @@ class _HomeScreensState extends State<HomeScreens> {
                   (todoData) => SingleTodo(
                     todo: todoData.data()['title'],
                     id: todoData.id,
-                    deletefunction:dellateTodo,
+                    deletefunction: dellateTodo,
+                    editFunction: editbutton,
                   ),
                 )
                 .toList(),

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 class SingleTodo extends StatelessWidget {
   final String todo;
   final String id;
+  //for delete function
   final Function deletefunction;
+  final Function editFunction;
 
-  SingleTodo({this.todo, this.id, this.deletefunction});
+  SingleTodo({this.todo, this.id, this.deletefunction, this.editFunction});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -29,7 +31,9 @@ class SingleTodo extends StatelessWidget {
                     size: 25,
                     color: Colors.green,
                   ),
-                  onPressed: () {}),
+                  onPressed: () {
+                    editFunction(id);
+                  }),
               IconButton(
                   icon: Icon(
                     Icons.delete,
