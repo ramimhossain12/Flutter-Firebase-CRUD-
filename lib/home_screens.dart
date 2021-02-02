@@ -12,7 +12,6 @@ class HomeScreens extends StatefulWidget {
 class _HomeScreensState extends State<HomeScreens> {
   final _textField = TextEditingController();
 
-
   //for server request get.....
 
   Future<void> _addtodo() async {
@@ -20,18 +19,26 @@ class _HomeScreensState extends State<HomeScreens> {
       return;
     }
 
+    // for data insert
+
     final collucrion = FirebaseFirestore.instance.collection('todo');
     await collucrion.add({
       "title": _textField.text,
-    
     });
-
-
-
-
 
     _textField.text = '';
     Navigator.of(context).pop();
+  }
+
+  //for delete
+
+  Future<void> dellateTodo(String id)async {
+    try {
+      final collucrion = FirebaseFirestore.instance.collection('todo').doc(id);
+      await collucrion.delete();
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -54,6 +61,8 @@ class _HomeScreensState extends State<HomeScreens> {
                 .map(
                   (todoData) => SingleTodo(
                     todo: todoData.data()['title'],
+                    id: todoData.id,
+                    deletefunction:dellateTodo,
                   ),
                 )
                 .toList(),
